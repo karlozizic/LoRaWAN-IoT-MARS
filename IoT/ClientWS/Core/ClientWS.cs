@@ -32,12 +32,13 @@ public static class ClientWs
         {
             WebSocketUri = InitializeWebSocketUri(webSocketUri);
             await webSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
-
+            
             await ReceiveMessages(webSocket);
 
             // Close the WebSocket connection
             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the client",
                 CancellationToken.None);
+            
             Console.WriteLine("Closed WebSocket connection");
         }
         catch (Exception ex)

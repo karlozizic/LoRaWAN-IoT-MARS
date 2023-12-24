@@ -3,7 +3,7 @@ using ClientWS.Interfaces;
 
 namespace ClientWS.Core;
 
-public class WebSocketAdapter : IWebSocket 
+public class WebSocketAdapter : IWebSocket, IDisposable
 {
     private readonly ClientWebSocket _webSocket;
 
@@ -32,5 +32,10 @@ public class WebSocketAdapter : IWebSocket
         await _webSocket.CloseAsync(closeStatus, statusDescription, cancellationToken);
     }
 
-    public WebSocketState State => _webSocket.State; 
+    public WebSocketState State => _webSocket.State;
+
+    public void Dispose()
+    {
+        _webSocket.Dispose();
+    }
 }
