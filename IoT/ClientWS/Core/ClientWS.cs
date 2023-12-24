@@ -57,7 +57,7 @@ public static class ClientWs
             
             if (result.MessageType == WebSocketMessageType.Text)
             {
-                var message = ResultParser.ParseData(result, buffer); 
+                var message = Parser.ParseData(result, buffer); 
                 Console.WriteLine($"Received message: {message} at time {DateTime.Now}");
             }
         }
