@@ -1,13 +1,21 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
-using Microsoft.VisualBasic;
 
 namespace ClientWS.Core;
 
-public static class ClientWS
+public static class ClientWs
 {
-    //TODO: treat websocket uri as secret 
-    private static readonly Uri WebSocketUri = new Uri("wss://smartinonet.oiv.hr/app?token=vgEAngAAABJzbWFydGlub25ldC5vaXYuaHJcgUBoeYcsll6iilTdfw9Q");
+    private static Uri _webSocketUri;
+
+    public static void ConfigureClientWs()
+    {
+        var webUri = Environment.GetEnvironmentVariable("URI");
+        if (webUri == null)
+        {
+            throw new Exception("Environment URI variable not configured!");
+        }
+        _webSocketUri = new Uri(webUri);
+    }
     
     public static async Task ConnectWebSocket()
     {
@@ -15,7 +23,7 @@ public static class ClientWS
         {
             try
             {
-                await webSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
+                await webSocket.ConnectAsync(_webSocketUri, CancellationToken.None);
 
                 await ReceiveMessage(webSocket);
 

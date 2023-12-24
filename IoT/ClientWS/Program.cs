@@ -1,8 +1,9 @@
-﻿using clientWS = ClientWS.Core.ClientWS; 
+﻿using ClientWS.Core;
 
 Console.WriteLine("Started console application..");
-
-await clientWS.ConnectWebSocket(); 
+// add web socket uri as environment variable - URI=<web_socket_uri>
+ClientWs.ConfigureClientWs();
+await ClientWs.ConnectWebSocket(); 
 
 
 
