@@ -5,40 +5,29 @@ namespace ClientWS.Core;
 
 public static class ClientWs
 {
-    private static Uri _webSocketUri;
-
-    public static void ConfigureClientWs()
-    {
-        var webUri = Environment.GetEnvironmentVariable("URI");
-        if (webUri == null)
-        {
-            throw new Exception("Environment URI variable not configured!");
-        }
-        _webSocketUri = new Uri(webUri);
-    }
+    private static readonly Uri WebSocketUri = new Uri(Environment.GetEnvironmentVariable("URI"));
     
     public static async Task ConnectWebSocket()
     {
-        using (var webSocket = new ClientWebSocket())
+        
+        using var webSocket = new ClientWebSocket();
+        try
         {
-            try
-            {
-                await webSocket.ConnectAsync(_webSocketUri, CancellationToken.None);
+            await webSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
 
-                await ReceiveMessage(webSocket);
+            await ReceiveMessages(webSocket);
 
-                // Close the WebSocket connection
-                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the client",
-                    CancellationToken.None);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"WebSocket connection error: {ex.Message}");
-            }
+            // Close the WebSocket connection
+            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the client",
+                CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"WebSocket connection error: {ex.Message}");
         }
     }
 
-    public static async Task ReceiveMessage(ClientWebSocket webSocket)
+    public static async Task ReceiveMessages(ClientWebSocket webSocket)
     {
         var buffer = new byte[1024];
 
