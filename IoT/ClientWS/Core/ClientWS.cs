@@ -1,19 +1,36 @@
 ﻿using System.Net.WebSockets;
-using System.Text;
 using ClientWS.Helpers;
+using ClientWS.Interfaces;
 
 namespace ClientWS.Core;
 
 public static class ClientWs
 {
-    private static readonly Uri WebSocketUri = new Uri(Environment.GetEnvironmentVariable("URI")); //throws exception if environment var URI is null 
+    private static Uri WebSocketUri;
     
-    public static async Task ConnectWebSocket()
+    private static Uri InitializeWebSocketUri(string? customUri = null)
     {
         
-        using var webSocket = new ClientWebSocket();
+        if (Uri.TryCreate(customUri, UriKind.Absolute, out var uri))
+        {
+            return new Uri(customUri);
+        }
+        
+        string uriString = Environment.GetEnvironmentVariable("URI");
+        
+        if (!string.IsNullOrEmpty(uriString))
+        {
+            return new Uri(uriString);
+        }
+        
+        throw new Exception("Invalid WebSocket URI.");
+    }
+    
+    public static async Task ConnectWebSocket(IWebSocket webSocket, string? webSocketUri = null)
+    {
         try
         {
+            WebSocketUri = InitializeWebSocketUri(webSocketUri);
             await webSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
 
             await ReceiveMessages(webSocket);
@@ -21,6 +38,7 @@ public static class ClientWs
             // Close the WebSocket connection
             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the client",
                 CancellationToken.None);
+            Console.WriteLine("Closed WebSocket connection");
         }
         catch (Exception ex)
         {
@@ -28,7 +46,7 @@ public static class ClientWs
         }
     }
 
-    public static async Task ReceiveMessages(ClientWebSocket webSocket)
+    public static async Task ReceiveMessages(IWebSocket webSocket)
     {
         var buffer = new byte[1024];
 
@@ -39,13 +57,13 @@ public static class ClientWs
             if (result.MessageType == WebSocketMessageType.Text)
             {
                 var message = ResultParser.ParseData(result, buffer); 
-                Console.WriteLine($"Received message: {message}");
+                Console.WriteLine($"Received message: {message} at time {DateTime.Now}");
             }
         }
     }
     
     //TODO: add method that sends data to MARS
-    /*public async Task SendData(ClientWebSocket webSocket)
+    /*private async Task SendData(ClientWebSocket webSocket)
     {    
     }*/
     
