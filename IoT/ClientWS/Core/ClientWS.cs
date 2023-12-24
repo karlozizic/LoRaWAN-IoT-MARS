@@ -1,11 +1,12 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
+using ClientWS.Helpers;
 
 namespace ClientWS.Core;
 
 public static class ClientWs
 {
-    private static readonly Uri WebSocketUri = new Uri(Environment.GetEnvironmentVariable("URI"));
+    private static readonly Uri WebSocketUri = new Uri(Environment.GetEnvironmentVariable("URI")); //throws exception if environment var URI is null 
     
     public static async Task ConnectWebSocket()
     {
@@ -37,17 +38,10 @@ public static class ClientWs
             
             if (result.MessageType == WebSocketMessageType.Text)
             {
-                var message = ParseData(result, buffer); 
+                var message = ResultParser.ParseData(result, buffer); 
                 Console.WriteLine($"Received message: {message}");
             }
         }
-    }
-    
-    //TODO: finish method for parsing data
-    public static string ParseData(WebSocketReceiveResult result, byte[] buffer)
-    {
-        string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-        return message; 
     }
     
     //TODO: add method that sends data to MARS
