@@ -53,7 +53,7 @@ public static class ClientWs
 
         while (webSocket.State == WebSocketState.Open)
         {
-            var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None); /*new ArraySegment<byte>(buffer),*/
+            var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
             
             if (result.MessageType == WebSocketMessageType.Text)
             {
