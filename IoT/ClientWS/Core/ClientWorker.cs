@@ -2,13 +2,27 @@
 using ClientWS.Exceptions;
 using ClientWS.Helpers;
 using ClientWS.Interfaces;
+using Microsoft.Extensions.Hosting;
 using WebSocketException = System.Net.WebSockets.WebSocketException;
 
 namespace ClientWS.Core;
 
-public static class ClientWs
+public class ClientWorker : BackgroundService
 {
+    private SendingService _sendingService; 
     private static Uri WebSocketUri;
+    private IWebSocket _webSocket;
+    public ClientWorker(SendingService sendingService, IWebSocket webSocket, string? customUri = null)
+    {
+        _sendingService = sendingService;
+        _webSocket = webSocket; 
+        WebSocketUri = InitializeWebSocketUri(customUri);
+    }
+    
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await ConnectWebSocket();
+    }
     
     private static Uri InitializeWebSocketUri(string? customUri = null)
     {
@@ -28,17 +42,16 @@ public static class ClientWs
         throw new WebSocketException("Invalid WebSocket URI.");
     }
     
-    public static async Task ConnectWebSocket(IWebSocket webSocket, string? webSocketUri = null)
+    public async Task ConnectWebSocket()
     {
         try
         {
-            WebSocketUri = InitializeWebSocketUri(webSocketUri);
-            await webSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
+            await _webSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
             
-            await ReceiveMessages(webSocket);
+            await ReceiveMessages();
 
             // Close the WebSocket connection
-            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the client",
+            await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the client",
                 CancellationToken.None);
             
             Console.WriteLine("Closed WebSocket connection");
@@ -49,13 +62,13 @@ public static class ClientWs
         }
     }
 
-    public static async Task ReceiveMessages(IWebSocket webSocket)
+    public async Task ReceiveMessages()
     {
         var buffer = new byte[1024];
 
-        while (webSocket.State == WebSocketState.Open)
+        while (_webSocket.State == WebSocketState.Open)
         {
-            var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
+            var result = await _webSocket.ReceiveAsync(buffer, CancellationToken.None);
             
             if (result.MessageType == WebSocketMessageType.Text)
             {
@@ -71,14 +84,9 @@ public static class ClientWs
                 catch (InvalidDeviceException ide)
                 {
                     // continue receiving messages 
+                    Console.WriteLine($"{ide.Message}");
                 }
             }
         }
     }
-    
-    //TODO: add method that sends data to MARS
-    /*private async Task SendData(ClientWebSocket webSocket)
-    {    
-    }*/
-    
 }
