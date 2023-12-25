@@ -1,6 +1,8 @@
 ﻿using System.Net.WebSockets;
+using ClientWS.Exceptions;
 using ClientWS.Helpers;
 using ClientWS.Interfaces;
+using WebSocketException = System.Net.WebSockets.WebSocketException;
 
 namespace ClientWS.Core;
 
@@ -23,7 +25,7 @@ public static class ClientWs
             return new Uri(uriString);
         }
         
-        throw new Exception("Invalid WebSocket URI.");
+        throw new WebSocketException("Invalid WebSocket URI.");
     }
     
     public static async Task ConnectWebSocket(IWebSocket webSocket, string? webSocketUri = null)
@@ -41,7 +43,7 @@ public static class ClientWs
             
             Console.WriteLine("Closed WebSocket connection");
         }
-        catch (Exception ex)
+        catch (WebSocketException ex)
         {
             Console.WriteLine($"WebSocket connection error: {ex.Message}");
         }
@@ -57,8 +59,19 @@ public static class ClientWs
             
             if (result.MessageType == WebSocketMessageType.Text)
             {
-                var message = ResultParser.ParseData(result, buffer); 
-                Console.WriteLine($"Received message: {message} at time {DateTime.Now}");
+                try
+                {
+                    //parsing only Oxobutton data
+                    var data = Parser.ParseData(result, buffer);
+                }
+                catch (PayloadDataException pde)
+                {
+                    Console.WriteLine($"{pde.Message}");
+                }
+                catch (InvalidDeviceException ide)
+                {
+                    // continue receiving messages 
+                }
             }
         }
     }
