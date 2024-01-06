@@ -30,6 +30,6 @@ public class ClientWsTests
                 true));
         var mockSendingService = new Mock<SendingService>();
         var clientService = new ClientWorker(mockSendingService.Object, mockWebSocket.Object, "wss://custom.uri");
-        await clientService.ReceiveMessages();
+        await clientService.ReceiveAndSendMessages();
     }
 }

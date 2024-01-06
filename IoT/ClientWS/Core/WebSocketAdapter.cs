@@ -7,7 +7,7 @@ public class WebSocketAdapter : IWebSocket, IDisposable
 {
     private readonly ClientWebSocket _webSocket = new();
 
-    public async Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
+    public async Task ConnectAsync(Uri? uri, CancellationToken cancellationToken)
     {
         await _webSocket.ConnectAsync(uri, cancellationToken);
     }

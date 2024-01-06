@@ -10,13 +10,14 @@ namespace ClientWS.Core;
 public class ClientWorker : BackgroundService
 {
     private SendingService _sendingService; 
-    private static Uri WebSocketUri;
+    private static Uri? WebSocketUri;
     private IWebSocket _webSocket;
+    //custom Uri in constructor added for Unit Test purposes - ClientWorker constructor is never called directly
     public ClientWorker(SendingService sendingService, IWebSocket webSocket, string? customUri = null)
     {
         _sendingService = sendingService;
         _webSocket = webSocket; 
-        WebSocketUri = InitializeWebSocketUri(customUri);
+        WebSocketUri = UriHelper.InitializeUri("WSS_URI", customUri);
     }
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -24,36 +25,18 @@ public class ClientWorker : BackgroundService
         await ConnectWebSocket();
     }
     
-    private static Uri InitializeWebSocketUri(string? customUri = null)
-    {
-        
-        if (Uri.TryCreate(customUri, UriKind.Absolute, out var uri))
-        {
-            return new Uri(customUri);
-        }
-        
-        string uriString = Environment.GetEnvironmentVariable("URI");
-        
-        if (!string.IsNullOrEmpty(uriString))
-        {
-            return new Uri(uriString);
-        }
-        
-        throw new WebSocketException("Invalid WebSocket URI.");
-    }
-    
     public async Task ConnectWebSocket()
     {
         try
         {
             await _webSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
-            
-            await ReceiveMessages();
+            await _sendingService.SetAccessToken(); 
+            await ReceiveAndSendMessages();
 
             // Close the WebSocket connection
             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by the client",
                 CancellationToken.None);
-            
+            _sendingService.Dispose();
             Console.WriteLine("Closed WebSocket connection");
         }
         catch (WebSocketException ex)
@@ -62,7 +45,7 @@ public class ClientWorker : BackgroundService
         }
     }
 
-    public async Task ReceiveMessages()
+    public async Task ReceiveAndSendMessages()
     {
         var buffer = new byte[1024];
 
@@ -74,8 +57,8 @@ public class ClientWorker : BackgroundService
             {
                 try
                 {
-                    //parsing only Oxobutton data
                     var data = Parser.ParseData(result, buffer);
+                    await _sendingService.SendData(data);
                 }
                 catch (PayloadDataException pde)
                 {

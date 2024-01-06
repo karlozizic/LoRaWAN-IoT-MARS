@@ -27,8 +27,9 @@ public static class Parser
 
         var deviceEui = deserializedData?.DeviceEUI;
         var payloadData = deserializedData?.PayloadData;
-        if (string.IsNullOrEmpty(deviceEui) || string.IsNullOrEmpty(payloadData) || deserializedData?.Command == "gw") //only rx messages are parsed
-            throw new PayloadDataException("Invalid payload data");
+        if (string.IsNullOrEmpty(deviceEui) || string.IsNullOrEmpty(payloadData) ||
+            deserializedData?.Command == "gw") //only rx messages are parsed
+            throw new PayloadDataException("gateway message or invalid payload data");
 
         //differentiate which payload to parse based on EUI as there are more devices in LoRaWAN network
         var deviceType = DeviceDifferentiator.GetDeviceTypeBasedOnEUI(deviceEui);

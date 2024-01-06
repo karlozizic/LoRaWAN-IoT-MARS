@@ -1,11 +1,15 @@
-﻿<component name="ProjectRunConfigurationManager">
+<component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ClientWebSocket" type="DotNetProject" factoryName=".NET Project">
     <option name="EXE_PATH" value="$PROJECT_DIR$/ClientWS/bin/Debug/net8.0/ClientWS.exe" />
     <option name="PROGRAM_PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ClientWS/bin/Debug/net8.0" />
     <option name="PASS_PARENT_ENVS" value="1" />
     <envs>
-      <env name="URI" value="wss://smartinonet.oiv.hr/app?token=vgEAngAAABJzbWFydGlub25ldC5vaXYuaHJcgUBoeYcsll6iilTdfw9Q" />
+      <env name="GRANT_TYPE" value="password" />
+      <env name="MARS_URI" value="http://marsdemo.koncar-inem.hr:9001/Token" />
+      <env name="PASSWORD" value="RprGr02k" />
+      <env name="WSS_URI" value="wss://smartinonet.oiv.hr/app?token=vgEAngAAABJzbWFydGlub25ldC5vaXYuaHJcgUBoeYcsll6iilTdfw9Q" />
+      <env name="USERNAME" value="rprgr2" />
     </envs>
     <option name="USE_EXTERNAL_CONSOLE" value="0" />
     <option name="USE_MONO" value="0" />
