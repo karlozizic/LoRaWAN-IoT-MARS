@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
 using ClientWS.Exceptions;
 using ClientWS.Helpers;
 using ClientWS.Models;
@@ -8,11 +9,11 @@ namespace ClientWS.Core;
 public class SendingService
 {
     private static Uri? _marsUri;
-    private static string? _username;
-    private static string? _password;
-    private static string? _grantType;
+    private static string _username;
+    private static string _password;
+    private static string _grantType;
     private static readonly HttpClient _httpClient = new();
-    private static string? _accessToken;
+    private static int _counterNodeId; 
     
     public SendingService()
     {
@@ -20,6 +21,7 @@ public class SendingService
         _username = EnvironmentalVariableHelper.FetchEnvVar("USERNAME");
         _password = EnvironmentalVariableHelper.FetchEnvVar("PASSWORD");
         _grantType = EnvironmentalVariableHelper.FetchEnvVar("GRANT_TYPE");
+        _counterNodeId = int.Parse(EnvironmentalVariableHelper.FetchEnvVar("COUNTER_NODE_ID"));
     }
 
     public async Task SetAccessToken()
@@ -33,13 +35,13 @@ public class SendingService
         
         var content = new FormUrlEncodedContent(formData);
         
-        var response = await _httpClient.PostAsync(_marsUri, content);
+        var response = await _httpClient.PostAsync(_marsUri + "Token", content);
 
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
             var tokenResponse = JsonSerializer.Deserialize<TokenResponse>(responseContent);
-            _accessToken = tokenResponse?.access_token;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse?.access_token);
         }
         else
         {
@@ -47,9 +49,42 @@ public class SendingService
         }
     }
     
-    public async Task SendData(ELSYSERSEye_Data data)
+    public async Task SendDataToMARS(ELSYSERSEye_Data data)
     {
-        Console.WriteLine("testing out");
+        var requestUri = _marsUri + "api/public/postRawDataInput"; 
+        //TODO: fix request body - currently 400 Input data is invalid!  
+        var body = new MARSPayload
+        {
+            Data = new List<DataItem>
+            {
+                new DataItem
+                {
+                    CounterNodeId = _counterNodeId,
+                    Values = new List<Value>
+                    {
+                        new Value
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Val = data.Temperature
+                        }
+                    }
+                }
+            }
+        };
+
+        string jsonBody = JsonSerializer.Serialize(body); 
+        var content = new StringContent(jsonBody, System.Text.Encoding.UTF8, "application/json");
+        try
+        {
+            var response = await _httpClient.PostAsync(requestUri, content); 
+            Console.WriteLine($"MARS Response:{response}");
+            string responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Response Content: {responseBody}");
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+        }
     }
     
     public void Dispose()

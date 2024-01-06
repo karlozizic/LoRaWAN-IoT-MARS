@@ -30,6 +30,7 @@ public class ClientWorker : BackgroundService
         try
         {
             await _webSocket.ConnectAsync(WebSocketUri, CancellationToken.None);
+            
             await _sendingService.SetAccessToken(); 
             await ReceiveAndSendMessages();
 
@@ -58,7 +59,7 @@ public class ClientWorker : BackgroundService
                 try
                 {
                     var data = Parser.ParseData(result, buffer);
-                    await _sendingService.SendData(data);
+                    await _sendingService.SendDataToMARS(data);
                 }
                 catch (PayloadDataException pde)
                 {
