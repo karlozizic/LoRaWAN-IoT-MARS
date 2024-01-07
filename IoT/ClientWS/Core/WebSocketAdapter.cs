@@ -5,14 +5,9 @@ namespace ClientWS.Core;
 
 public class WebSocketAdapter : IWebSocket, IDisposable
 {
-    private readonly ClientWebSocket _webSocket;
+    private readonly ClientWebSocket _webSocket = new();
 
-    public WebSocketAdapter(ClientWebSocket webSocket)
-    {
-        _webSocket = webSocket;
-    }
-    
-    public async Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
+    public async Task ConnectAsync(Uri? uri, CancellationToken cancellationToken)
     {
         await _webSocket.ConnectAsync(uri, cancellationToken);
     }
