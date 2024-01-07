@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using ClientWS.Exceptions;
 using ClientWS.Helpers;
@@ -51,29 +52,30 @@ public class SendingService
     
     public async Task SendDataToMARS(ELSYSERSEye_Data data)
     {
-        var requestUri = _marsUri + "api/public/postRawDataInput"; 
-        //TODO: fix request body - currently 400 Input data is invalid!  
+        var requestUri = _marsUri + "api/public/postRawDataInput";  
+        var timeNow = DateTime.UtcNow;
+        string formattedUtcTime = timeNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
         var body = new MARSPayload
         {
-            Data = new List<DataItem>
+            data = new List<DataItem>
             {
                 new DataItem
                 {
-                    CounterNodeId = _counterNodeId,
-                    Values = new List<Value>
+                    counterNodeId = _counterNodeId,
+                    values = new List<Value>
                     {
                         new Value
                         {
-                            Timestamp = DateTime.UtcNow,
-                            Val = data.Temperature
+                            timestamp = formattedUtcTime,
+                            value = data.Temperature
                         }
                     }
                 }
             }
         };
 
-        string jsonBody = JsonSerializer.Serialize(body); 
-        var content = new StringContent(jsonBody, System.Text.Encoding.UTF8, "application/json");
+        var jsonBody = JsonSerializer.Serialize(body); 
+        var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
         try
         {
             var response = await _httpClient.PostAsync(requestUri, content); 
