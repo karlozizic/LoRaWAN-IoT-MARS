@@ -1,11 +1,11 @@
 # Application of the MARS IoT platform for connecting and visualizing data from devices on the LoRaWAN network
-This repository contains the source code and documentation for the MARS IoT Data Collection Service, a service designed to collect data from IoT devices via the LoRaWAN network and send it to the MARS IoT platform. This project is part of the "Development of Software Solutions for Industrial IoT Systems" course for the academic year 2023/24.
+This repository contains the source code and documentation for the MARS IoT Data Collection Service, a service designed to collect data from IoT device via the LoRaWAN network and send it to the MARS IoT platform. This project is part of the "Development of Software Solutions for Industrial IoT Systems" course for the academic year 2023/24.
 
 # Overview
 The MARS IoT Data Collection Service is a standalone service responsible for:
 
-Continuous collection of data from an IoT device registered on a LoRaWAN network server.
-Parsing received data frames from IoT devices.
+Continuous collection of data from an ELSYS ERS EYE v1 sensor registered on a LoRaWAN network server.
+Parsing received data frames.
 Sending parsed information and measurements to the MARS IoT platform.
 
 # Prerequisites
