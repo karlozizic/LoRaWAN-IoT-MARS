@@ -5,11 +5,13 @@
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ClientWS/bin/Debug/net8.0" />
     <option name="PASS_PARENT_ENVS" value="1" />
     <envs>
-      <env name="COUNTER_NODE_ID" value="3" />
+      <env name="TEMPERATURE_NODE_ID" value="11" />
       <env name="GRANT_TYPE" value="password" />
       <env name="MARS_URI" value="http://marsdemo.koncar-inem.hr:9001" />
       <env name="PASSWORD" value="RprGr02k" />
       <env name="WSS_URI" value="wss://smartinonet.oiv.hr/app?token=vgEAngAAABJzbWFydGlub25ldC5vaXYuaHJcgUBoeYcsll6iilTdfw9Q" />
+      <env name="HUMIDITY_NODE_ID" value="12" />
+      <env name="LIGHT_NODE_ID" value="13" />
       <env name="USERNAME" value="rprgr2" />
     </envs>
     <option name="USE_EXTERNAL_CONSOLE" value="0" />
