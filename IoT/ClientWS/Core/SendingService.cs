@@ -14,7 +14,6 @@ public class SendingService
     private static string _password;
     private static string _grantType;
     private static readonly HttpClient _httpClient = new();
-    private static int _counterNodeId; 
     
     public SendingService()
     {
@@ -22,7 +21,7 @@ public class SendingService
         _username = EnvironmentalVariableHelper.FetchEnvVar("USERNAME");
         _password = EnvironmentalVariableHelper.FetchEnvVar("PASSWORD");
         _grantType = EnvironmentalVariableHelper.FetchEnvVar("GRANT_TYPE");
-        _counterNodeId = int.Parse(EnvironmentalVariableHelper.FetchEnvVar("COUNTER_NODE_ID"));
+        
     }
 
     public async Task SetAccessToken()
@@ -50,25 +49,19 @@ public class SendingService
         }
     }
     
-    public async Task SendDataToMARS(ELSYSERSEye_Data data)
+    public async Task SendDataToOneNode(Value value, int nodeId)
     {
         var requestUri = _marsUri + "api/public/postRawDataInput";  
-        var timeNow = DateTime.UtcNow;
-        string formattedUtcTime = timeNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
         var body = new MARSPayload
         {
             data = new List<DataItem>
             {
                 new DataItem
                 {
-                    counterNodeId = _counterNodeId,
+                    counterNodeId = nodeId,
                     values = new List<Value>
                     {
-                        new Value
-                        {
-                            timestamp = formattedUtcTime,
-                            value = data.Temperature
-                        }
+                        value
                     }
                 }
             }
