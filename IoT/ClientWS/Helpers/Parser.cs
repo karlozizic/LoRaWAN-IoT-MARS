@@ -42,7 +42,7 @@ public static class Parser
         Console.WriteLine($"Parsed data: Temperature({data.Temperature}) Humidity({data.Humidity}) Light({data.Light}) Motion({data.Motion}) BatteryVoltage({data.BatteryVoltage}) Occupancy({data.Occupancy}) DebugInformation({data.DebugInformation}) SensorSettings({data.SensorSettings})");
         return data;
     }
-    
+    //converts hex string to byte array
     private static List<byte> HexToBytes(string hex)
     {
         var bytes = new List<byte>();
@@ -50,7 +50,7 @@ public static class Parser
             bytes.Add(Convert.ToByte(hex.Substring(c, 2), 16));
         return bytes;
     }
-    
+    //converts 16 bit binary number to decimal
     private static int Bin16Dec(int bin)
     {
         var num = bin & 0xFFFF;
@@ -67,12 +67,15 @@ public static class Parser
             switch (data[i])
             {
                 case TYPE_TEMP:
+                    // Big-endian - shifts the first byte 8 bits to the left and ORs it with the second byte
                     var temp = (data[i + 1] << 8) | (data[i + 2]);
                     temp = Bin16Dec(temp);
+                    // Divide by 10 to get the actual temperature - defined in documentation
                     obj.Temperature = temp / 10.0; 
                     i += 2;
                     break;
                 case TYPE_HUMIDITY:
+                    // one byte 
                     var rh = data[i + 1];
                     obj.Humidity = rh;
                     i += 1;
@@ -94,25 +97,25 @@ public static class Parser
                     i += 1;
                     break;
                 case TYPE_GRIDEYE:
+                    // reference value
                     var refValue = data[i + 1];
                     i++;
                     var grideyeValues = new List<double>();
+                    // loop iterates over 8x8 grid
                     for (var j = 0; j < 64; j++)
                     {
+                        // / 10.0 for temperature 
                         grideyeValues.Add(refValue + (data[i + j] / 10.0));
                     }
                     obj.GridEyeOccupancy = grideyeValues;
                     i += 64;
                     break;
+                //not interested in these values
                 case TYPE_DEBUG:
-                    var debugData = BitConverter.ToUInt32(new byte[] { data[i + 1], data[i + 2], data[i + 3], data[i + 4] }, 0);
-                    obj.DebugInformation = debugData;
                     i += 4;
                     break;
                 case TYPE_SETTINGS:
-                    var settingsData = new byte[data.Count - i - 1];
-                    Array.Copy(data.ToArray(), i + 1, settingsData, 0, settingsData.Length);
-                    obj.SensorSettings = settingsData;
+                    //exit the loop
                     i = data.Count;
                     break;
                 default:
